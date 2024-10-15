@@ -32,7 +32,7 @@
 Projeto: 
 Analise de Solo: Macronutrientes (N, P, K) e PH
 Objetivo:
-Desenvolver uma aplicação para análise de solo, focada em medir os níveis de pH, fósforo (P) e potássio (K), essenciais para o manejo agrícola. A aplicação irá gerar relatórios com recomendações de correção e manejo baseado nos resultados obtidos.
+Desenvolver uma aplicação para análise de solo, focada em medir os níveis de pH, nitrogênio (N), fósforo (P) e potássio (K), essenciais para o manejo agrícola. A aplicação irá gerar relatórios com recomendações de correção e manejo baseado nos resultados obtidos.
 Funcionalidades:
 Entrada de Dados: Inserção manual de dados de pH, Nitrogenio, Fosforo e Potássio do solo.
 Armazenamento: Armazena as informações no banco de dados
