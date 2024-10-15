@@ -17,10 +17,10 @@ def adicionar_solo():
         potassio = float(input("Digite a concentração de Potássio: "))
         fosforo = float(input("Digite a concentração de Fósforo: "))
         data_registro = input("Digite a data de registro (dd/mm/yyyy): ")
-
+        # Convertendo data
         data = datetime.datetime.strptime(data_registro, "%d/%m/%Y").date()
         data_str = data.strftime("%Y-%m-%d")
-
+        # Instrução banco de dados
         cadastro = "INSERT INTO tb_solo (ph, nitrogenio, potassio, fosforo, data_registro) VALUES (:1, :2, :3, :4, TO_DATE(:5, 'YYYY-MM-DD'))"
         var_cadastro.execute(cadastro, [ph, nitrogenio, potassio, fosforo, data_str])
         conn.commit()
@@ -30,31 +30,42 @@ def adicionar_solo():
         print("Algo deu errado...")
     else:
         print("DADOS ARMAZENADOS")
+        # Adiciona ao arquivo json os valores
+        adicionar_dados_json(ph, nitrogenio, potassio, fosforo, data_str)
+        #Regista a ação feita pelo usuário
+        arq = open("arquivos.txt", "a+")
+        arq.write("Registro efetuado\n")
+        arq.close()
 
 def listar_solos():
     print("-------Listar Solo-------")
     lista_dados = []
 
     try:
+        # Consulta banco de dados
         consulta = "SELECT id, ph, nitrogenio, potassio, fosforo, data_registro FROM tb_solo"
         var_consulta.execute(consulta)
-
+        # recuperando todas as linhas da consulta
         data = var_consulta.fetchall()
-
+        # Adicionando os dado na lista
         for dt in data:
             lista_dados.append(dt)
 
         # Ordenando a lista
         lista_dados.sort()
-
+        # Data Frame para visualização dos dados
         data_frame_dados = pd.DataFrame.from_records(lista_dados, columns=['id', 'ph', 'nitrogenio', 'potassio', 'fosforo', 'data_registro'], index= 'id')
 
         if data_frame_dados.empty:
             print(f"Não hà solos registrados!")
         else:
             print(data_frame_dados)
+            # Regista a ação feita pelo usuário
+            arq = open("arquivos.txt", "a+")
+            arq.write("Consulta efetuada\n")
+            arq.close()
     except Exception as e:
-        print("Algo deu errado!")
+        print("Algo deu errado!", e)
     print()
 
 def atualizar_solo():
@@ -90,7 +101,12 @@ def atualizar_solo():
 
             var_atualizacao.execute(atualizar)
             conn.commit()
-        print("Dados atualizados!")
+            print("Dados atualizados!")
+            adicionar_dados_json(novo_ph,novo_nitrogenio, novo_potassio, novo_fosforo, data)
+            # Regista a ação feita pelo usuário
+            arq = open("arquivos.txt", "a+")
+            arq.write("Update efetuado\n")
+            arq.close()
     except Exception as e:
         print("Algo deu errado!")
 
@@ -115,6 +131,10 @@ def deletar_solo():
             var_delecao.execute(deletar)
             conn.commit()
             print("Solo Deletado!")
+            #Regista a ação feita pelo usuário
+            arq = open("arquivos.txt", "a+")
+            arq.write("Delete efetuado\n")
+            arq.close()
 
 def excluir_todos():
     try:
@@ -126,12 +146,17 @@ def excluir_todos():
             conn.commit()
 
             print("Todos os solos foram excluidos!")
+            # Regista a ação feita pelo usuário
+            arq = open("arquivos.txt", "a+")
+            arq.write("Excluiu todos os dados\n")
+            arq.close()
         else:
             print("Exclusão cancelada")
     except Exception as e:
         print("Algo deu errado!", e)
 
 def analisar_solo():
+    # A análise do solo pega valores referentes ao solo ideal para plantações de SOJA e MILHO
     print("-------Analisar Solo-------")
     try:
         solo_id = int(input("Digite o ID do solo que deseja analisar: "))
@@ -151,36 +176,44 @@ def analisar_solo():
                 # Verificação de cada parâmetro
                 print(f"\nAnalisando solo com ID {solo_id}:")
                 if not (pH_ideal[0] <= ph <= pH_ideal[1]):
-                    print(f"pH fora do ideal! Valor atual: {ph}, intervalo ideal: {pH_ideal}")
+                    print(f"PH fora do ideal!\n Valor atual: {ph}, intervalo ideal: {pH_ideal}")
                 else:
-                    print(f"pH adequado: {ph}")
+                    print(f"PH adequado: {ph}")
 
                 if not (nitrogenio_ideal[0] <= nitrogenio <= nitrogenio_ideal[1]):
-                    print(f"Teor de nitrogênio fora do ideal! Valor atual: {nitrogenio} mg/kg, intervalo ideal: {nitrogenio_ideal} mg/kg")
+                    print(f"Teor de nitrogênio fora do ideal!\n Valor atual: {nitrogenio} mg/kg, intervalo ideal: {nitrogenio_ideal} mg/kg")
                 else:
                     print(f"Teor de nitrogênio adequado: {nitrogenio} mg/kg")
 
                 if not (fosforo_ideal[0] <= fosforo <= fosforo_ideal[1]):
-                    print(f"Teor de fósforo fora do ideal! Valor atual: {fosforo} mg/kg, intervalo ideal: {fosforo_ideal} mg/kg")
+                    print(f"Teor de fósforo fora do ideal!\n Valor atual: {fosforo} mg/kg, intervalo ideal: {fosforo_ideal} mg/kg")
                 else:
                     print(f"Teor de fósforo adequado: {fosforo} mg/kg")
 
                 if not (potassio_ideal[0] <= potassio <= potassio_ideal[1]):
-                    print(f"Teor de potássio fora do ideal! Valor atual: {potassio} mg/kg, intervalo ideal: {potassio_ideal} mg/kg")
+                    print(f"Teor de potássio fora do ideal!\n Valor atual: {potassio} mg/kg, intervalo ideal: {potassio_ideal} mg/kg")
                 else:
                     print(f"Teor de potássio adequado: {potassio} mg/kg")
+            # Regista a ação feita pelo usuário
+            arq = open("arquivos.txt", "a+")
+            arq.write("Analise efetuada\n")
+            arq.close()
         else:
             print(f"Nenhum solo encontrado com o ID {solo_id}.")
     except ValueError:
-        print("Por favor, digite um número inteiro válido para o ID.")
+        print("Por favor, digite um número válido.")
     except Exception as e:
-        print(f"Ocorreu um erro: {e}")
+        print("Ocorreu um erro: ", e)
 
 def sair():
     try:
         confirmar = input("Deseja mesmo sair? [S]im ou [N]ão: ")
         if confirmar.upper() == 'S':
             print("Programa encerrado")
+            # Regista a ação feita pelo usuário
+            arq = open("arquivos.txt", "a+")
+            arq.write("Saiu do programa\n")
+            arq.close()
             sys.exit()  # Encerra a execução do programa
         elif confirmar.upper() == 'N':
             print("Continuando o programa...")
@@ -188,6 +221,36 @@ def sair():
             print("Opção inválida. Tente novamente.")
     except Exception as e:
         print(f"Ocorreu um erro: {e}")
+
+def adicionar_dados_json(ph, nitrogenio, potassio, fosforo, data_str):
+    # Cria um dicionário com os novos dados
+    dicionario = {
+        "ph": str(ph),
+        "nitrogenio": str(nitrogenio),
+        "potassio": str(potassio),
+        "fosforo": str(fosforo),
+        "data": str(data_str)
+    }
+
+    # Caminho para o arquivo JSON
+    filename = "agro.json"
+
+    try:
+        # Tenta abrir o arquivo existente para leitura
+        with open(filename, 'r') as file:
+            # Carrega os dados existentes
+            data = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Se não existir ou houver erro na leitura, inicia uma nova lista
+        data = []
+
+    # Adiciona o novo dicionário à lista de dados
+    data.append(dicionario)
+
+    # Abre o arquivo para escrita e atualiza com a nova lista de dados
+    with open(filename, 'w') as file:
+        json.dump(data, file, indent=6)
+
 
 
 # Conectando Banco de dados
